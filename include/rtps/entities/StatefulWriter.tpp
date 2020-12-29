@@ -22,8 +22,6 @@ This file is part of embeddedRTPS.
 Author: i11 - Embedded Software, RWTH Aachen University
 */
 
-#include "rtps/entities/StatefulWriter.h"
-
 #include "rtps/messages/MessageFactory.h"
 #include <cstring>
 #include <stdio.h>
@@ -74,20 +72,41 @@ bool StatefulWriterT<NetworkDriver>::init(TopicData attributes,
   m_packetInfo.srcPort = attributes.unicastLocator.port;
   if (m_attributes.endpointGuid.entityId ==
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+    #ifdef MROS2_USE_EMBEDDEDRTPS
+        m_heartbeatThread = sys_thread_new("HBThreadPub", callHbPubFunc, this,
+                                       Config::HEARTBEAT_STACKSIZE,
+                                       Config::THREAD_POOL_WRITER_PRIO);
+    networkPubDriverPtr = this;
+    hbPubFuncPtr = hbFunctionJumppad;
+    #else
     m_heartbeatThread = sys_thread_new("HBThreadPub", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
                                        Config::THREAD_POOL_WRITER_PRIO);
+    #endif
   } else if (m_attributes.endpointGuid.entityId ==
              ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+    #ifdef MROS2_USE_EMBEDDEDRTPS
+    m_heartbeatThread = sys_thread_new("HBThreadSub", callHbSubFunc, this,
+                                       Config::HEARTBEAT_STACKSIZE,
+                                       Config::THREAD_POOL_WRITER_PRIO);
+    networkSubDriverPtr = this;
+    hbSubFuncPtr = hbFunctionJumppad;
+    #else
     m_heartbeatThread = sys_thread_new("HBThreadSub", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
                                        Config::THREAD_POOL_WRITER_PRIO);
+    #endif
   } else {
     m_heartbeatThread = sys_thread_new("HBThread", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
                                        Config::THREAD_POOL_WRITER_PRIO);
   }
-
+  /*
+  if(hbFuncPointer == NULL)
+  {
+    hbFuncPointer = hbFunctionJumppad;
+    hogePointer = this;
+  }*/
   m_is_initialized_ = true;
   return true;
 }
@@ -350,5 +369,6 @@ void StatefulWriterT<NetworkDriver>::sendHeartBeat() {
   }
   m_hbCount.value++;
 }
+
 
 #undef SFW_VERBOSE

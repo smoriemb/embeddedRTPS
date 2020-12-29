@@ -30,6 +30,8 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "rtps/storages/MemoryPool.h"
 #include "rtps/storages/SimpleHistoryCache.h"
 
+
+
 namespace rtps {
 
 template <class NetworkDriver> class StatefulWriterT final : public Writer {
@@ -67,15 +69,20 @@ private:
   MemoryPool<ReaderProxy, Config::NUM_READER_PROXIES_PER_WRITER> m_proxies;
 
   bool sendData(const ReaderProxy &reader, const SequenceNumber_t &sn);
-  static void hbFunctionJumppad(void *thisPointer);
   void sendHeartBeatLoop();
   void sendHeartBeat();
   bool isIrrelevant(ChangeKind_t kind) const;
+  static void hbFunctionJumppad(void *thisPointer);
 };
 
 using StatefulWriter = StatefulWriterT<UdpDriver>;
 } // namespace rtps
-
+extern void *networkSubDriverPtr;
+extern void *networkPubDriverPtr;
+extern void (*hbPubFuncPtr)(void *);
+extern void (*hbSubFuncPtr)(void *);
+extern "C" void callHbPubFunc(void *arg);
+extern "C" void callHbSubFunc(void *arg);
 #include "StatefulWriter.tpp"
 
 #endif // RTPS_STATEFULWRITER_H

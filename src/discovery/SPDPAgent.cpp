@@ -70,8 +70,13 @@ void SPDPAgent::start() {
     return;
   }
   m_running = true;
-  sys_thread_new("SPDPThread", runBroadcast, this,
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  sys_thread_new("SPDPThread", callRunBroadcast, this,
                  Config::SPDP_WRITER_STACKSIZE, Config::SPDP_WRITER_PRIO);
+#else
+  sys_thread_new("SPDPThread", runBroadcast, this,
+                   Config::SPDP_WRITER_STACKSIZE, Config::SPDP_WRITER_PRIO);
+#endif
 }
 
 void SPDPAgent::stop() { m_running = false; }
@@ -336,6 +341,10 @@ void SPDPAgent::addParticipantParameters() {
                           BuildInEndpointSet::DISC_BIE_SUBSCRIPTION_DETECTOR);
 
   endCurrentList();
+}
+
+void callRunBroadcast(void *arg){
+	SPDPAgent::runBroadcast(arg);
 }
 
 #undef SPDP_VERBOSE

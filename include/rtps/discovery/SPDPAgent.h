@@ -44,6 +44,7 @@ public:
   void init(Participant &participant, BuiltInEndpoints &endpoints);
   void start();
   void stop();
+  static void runBroadcast(void *args);
 
 private:
   Participant *mp_participant = nullptr;
@@ -66,9 +67,13 @@ private:
   void addInlineQos();
   void addParticipantParameters();
   void endCurrentList();
-
-  static void runBroadcast(void *args);
 };
 } // namespace rtps
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+void callRunBroadcast(void *args);
+#ifdef __cplusplus
+}
+#endif
 #endif // RTPS_SPDP_H

@@ -73,16 +73,28 @@ bool ThreadPool::startThreads() {
   m_running = true;
   for (auto &thread : m_writers) {
     // TODO ID, err check, waitOnStop
+    #ifdef MROS2_USE_EMBEDDEDRTPS
+    thread = sys_thread_new("WriterThread", callWriterThreadFunction, this,
+                            Config::THREAD_POOL_WRITER_STACKSIZE,
+                            Config::THREAD_POOL_WRITER_PRIO);
+    #else
     thread = sys_thread_new("WriterThread", writerThreadFunction, this,
                             Config::THREAD_POOL_WRITER_STACKSIZE,
                             Config::THREAD_POOL_WRITER_PRIO);
+    #endif
   }
 
   for (auto &thread : m_readers) {
     // TODO ID, err check, waitOnStop
-    thread = sys_thread_new("ReaderThread", readerThreadFunction, this,
+    #ifdef MROS2_USE_EMBEDDEDRTPS
+    thread = sys_thread_new("ReaderThread", callReaderThreadFunction, this,
                             Config::THREAD_POOL_READER_STACKSIZE,
                             Config::THREAD_POOL_READER_PRIO);
+    # else 
+     thread = sys_thread_new("ReaderThread", readerThreadFunction, this,
+                            Config::THREAD_POOL_READER_STACKSIZE,
+                            Config::THREAD_POOL_READER_PRIO);
+    #endif
   }
   return true;
 }
@@ -180,6 +192,15 @@ void ThreadPool::doReaderWork() {
 
     m_receiveJumppad(m_callee, const_cast<const PacketInfo &>(packet));
   }
+  syslog(LOG_NOTICE, "hogehoge");
+}
+
+void callWriterThreadFunction(void *arg){
+	ThreadPool::writerThreadFunction(arg);
+}
+
+void callReaderThreadFunction(void *arg){
+	ThreadPool::readerThreadFunction(arg);
 }
 
 #undef THREAD_POOL_VERBOSE

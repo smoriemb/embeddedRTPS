@@ -55,6 +55,8 @@ public:
 
   static void readCallback(void *arg, udp_pcb *pcb, pbuf *p,
                            const ip_addr_t *addr, Ip4Port_t port);
+  static void writerThreadFunction(void *arg);
+  static void readerThreadFunction(void *arg);
 
 private:
   receiveJumppad_fp m_receiveJumppad;
@@ -71,12 +73,16 @@ private:
   ThreadSafeCircularBuffer<PacketInfo,
                            Config::THREAD_POOL_WORKLOAD_QUEUE_LENGTH>
       m_queueIncoming;
-
-  static void writerThreadFunction(void *arg);
-  static void readerThreadFunction(void *arg);
   void doWriterWork();
   void doReaderWork();
 };
 } // namespace rtps
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+void callWriterThreadFunction(void *arg);
+void callReaderThreadFunction(void *arg);
+#ifdef __cplusplus
+}
+#endif
 #endif // RTPS_THREADPOOL_H

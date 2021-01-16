@@ -105,7 +105,6 @@ bool StatefulWriterT<NetworkDriver>::init(TopicData attributes,
   if(hbFuncPointer == NULL)
   {
     hbFuncPointer = hbFunctionJumppad;
-    hogePointer = this;
   }*/
   m_is_initialized_ = true;
   return true;

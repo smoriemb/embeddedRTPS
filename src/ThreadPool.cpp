@@ -192,7 +192,6 @@ void ThreadPool::doReaderWork() {
 
     m_receiveJumppad(m_callee, const_cast<const PacketInfo &>(packet));
   }
-  syslog(LOG_NOTICE, "hogehoge");
 }
 
 void callWriterThreadFunction(void *arg){

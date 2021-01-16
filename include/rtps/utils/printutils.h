@@ -9,20 +9,20 @@
 
 inline void printEntityId(rtps::EntityId_t id) {
   for (const auto byte : id.entityKey) {
-    printf("%i", byte);
+    syslog(LOG_NOTICE, "%x", byte);
   }
-  printf("%i", static_cast<uint8_t>(id.entityKind));
+  syslog(LOG_NOTICE, "%x", static_cast<uint8_t>(id.entityKind));
 }
 
 inline void printGuidPrefix(rtps::GuidPrefix_t prefix) {
   for (const auto byte : prefix.id) {
-    printf("%i", byte);
+    syslog(LOG_NOTICE, "%x", byte);
   }
 }
 
 inline void printGuid(rtps::Guid guid) {
   printGuidPrefix(guid.prefix);
-  printf(":");
+  syslog(LOG_NOTICE, ":");
   printEntityId(guid.entityId);
 }
 

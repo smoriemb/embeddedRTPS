@@ -30,7 +30,7 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 using rtps::ThreadPool;
 
-#define THREAD_POOL_VERBOSE 0
+#define THREAD_POOL_VERBOSE 1
 
 ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
     : m_receiveJumppad(receiveCallback), m_callee(callee) {
@@ -42,7 +42,7 @@ ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
   err_t outputErr = sys_sem_new(&m_writerNotificationSem, 0);
 #if THREAD_POOL_VERBOSE
   if (inputErr != ERR_OK || outputErr != ERR_OK) {
-    printf("ThreadPool: Failed to create Semaphores.\n");
+    syslog(LOG_NOTICE,"ThreadPool: Failed to create Semaphores.\n");
   }
 #endif
 }
@@ -121,9 +121,11 @@ bool ThreadPool::addWorkload(Writer *workload) {
 }
 
 bool ThreadPool::addNewPacket(PacketInfo &&packet) {
+  static int i = 0;
   bool res = m_queueIncoming.moveElementIntoBuffer(std::move(packet));
   if (res) {
     sys_sem_signal(&m_readerNotificationSem);
+    syslog(LOG_NOTICE,"ThreadPool: addNewPacket %d", i++);
   }
   return res;
 }
@@ -132,7 +134,7 @@ void ThreadPool::writerThreadFunction(void *arg) {
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
 #if THREAD_POOL_VERBOSE
-    printf("nullptr passed to writer function\n");
+    syslog(LOG_NOTICE,"nullptr passed to writer function\n");
 #endif
     return;
   }
@@ -164,7 +166,7 @@ void ThreadPool::readCallback(void *args, udp_pcb *target, pbuf *pbuf,
   packet.buffer = PBufWrapper{pbuf};
   if (!pool.addNewPacket(std::move(packet))) {
 #if THREAD_POOL_VERBOSE
-    printf("ThreadPool: dropped packet\n");
+    syslog(LOG_NOTICE,"ThreadPool: dropped packet\n");
 #endif
   }
 }
@@ -173,7 +175,7 @@ void ThreadPool::readerThreadFunction(void *arg) {
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
 #if THREAD_POOL_VERBOSE
-    printf("nullptr passed to reader function\n");
+    syslog(LOG_NOTICE,"nullptr passed to reader function\n");
 #endif
     return;
   }
@@ -182,17 +184,18 @@ void ThreadPool::readerThreadFunction(void *arg) {
 
 void ThreadPool::doReaderWork() {
 
+  static int i = 0;
   while (m_running) {
     PacketInfo packet;
     auto isWorkToDo = m_queueIncoming.moveFirstInto(packet);
     if (!isWorkToDo) {
+      syslog(LOG_NOTICE, "ThreadPool::doReaderWork %d", i++);
       sys_sem_wait(&m_readerNotificationSem);
       continue;
     }
 
     m_receiveJumppad(m_callee, const_cast<const PacketInfo &>(packet));
   }
-  syslog(LOG_NOTICE, "hogehoge");
 }
 
 void callWriterThreadFunction(void *arg){

@@ -148,6 +148,9 @@ bool StatefulReaderT<NetworkDriver>::onNewHeartbeat(
   info.destPort = writer->remoteLocator.port;
   rtps::MessageFactory::addHeader(info.buffer,
                                   m_attributes.endpointGuid.prefix);
+  info.buffer.reserve(16);//TODO: clean this
+  uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0c, 0x00};
+  info.buffer.append(info_dst, 16);
   rtps::MessageFactory::addAckNack(info.buffer, msg.writerId, msg.readerId,
                                    writer->getMissing(msg.firstSN, msg.lastSN),
                                    writer->getNextAckNackCount());

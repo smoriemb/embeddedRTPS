@@ -132,10 +132,11 @@ rtps::Reader *Participant::getReader(EntityId_t id) const {
 rtps::Writer *
 Participant::getMatchingWriter(const TopicData &readerTopicData) const {
   for (uint8_t i = 0; i < m_numWriters; ++i) {
-    if (m_writers[i]->m_attributes.matchesTopicOf(readerTopicData) &&
-        (readerTopicData.reliabilityKind == ReliabilityKind_t::BEST_EFFORT ||
-         m_writers[i]->m_attributes.reliabilityKind ==
-             ReliabilityKind_t::RELIABLE)) {
+    // if (m_writers[i]->m_attributes.matchesTopicOf(readerTopicData) &&
+    //     (readerTopicData.reliabilityKind == ReliabilityKind_t::BEST_EFFORT ||
+    //      m_writers[i]->m_attributes.reliabilityKind ==
+    //          ReliabilityKind_t::RELIABLE)) {
+    if (m_writers[i]->m_attributes.matchesTopicOf(readerTopicData)) {
       return m_writers[i];
     }
   }
@@ -145,10 +146,11 @@ Participant::getMatchingWriter(const TopicData &readerTopicData) const {
 rtps::Reader *
 Participant::getMatchingReader(const TopicData &writerTopicData) const {
   for (uint8_t i = 0; i < m_numReaders; ++i) {
-    if (m_readers[i]->m_attributes.matchesTopicOf(writerTopicData) &&
-        (writerTopicData.reliabilityKind == ReliabilityKind_t::RELIABLE ||
-         m_readers[i]->m_attributes.reliabilityKind ==
-             ReliabilityKind_t::BEST_EFFORT)) {
+    if (m_readers[i]->m_attributes.matchesTopicOf(writerTopicData)) {
+    // if (m_readers[i]->m_attributes.matchesTopicOf(writerTopicData) &&
+    //         (writerTopicData.reliabilityKind == ReliabilityKind_t::RELIABLE ||
+    //           m_readers[i]->m_attributes.reliabilityKind ==
+    //               ReliabilityKind_t::BEST_EFFORT)) {
       return m_readers[i];
     }
   }

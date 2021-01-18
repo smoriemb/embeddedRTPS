@@ -248,7 +248,8 @@ void SPDPAgent::addInlineQos() {
 }
 
 void SPDPAgent::endCurrentList() {
-
+  //adding node name and node namespace
+/*
   ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_ENTITY_NAME); //TODO: clean this
   ucdr_serialize_uint16_t(&m_microbuffer, 8);
   ucdr_serialize_uint16_t(&m_microbuffer, 4);
@@ -285,7 +286,7 @@ void SPDPAgent::endCurrentList() {
   ucdr_serialize_uint8_t(&m_microbuffer, ';');
   ucdr_serialize_uint8_t(&m_microbuffer, 0);
   ucdr_serialize_uint16_t(&m_microbuffer, 0);
-
+*/
   ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_SENTINEL);
   ucdr_serialize_uint16_t(&m_microbuffer, 0);
 }

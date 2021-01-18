@@ -164,7 +164,7 @@ void StatelessWriterT<NetworkDriver>::progress() {
     info.srcPort = m_packetInfo.srcPort;
 
     MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
-    MessageFactory::addSubMessageTimeStamp(info.buffer);
+    //MessageFactory::addSubMessageTimeStamp(info.buffer);
 
     {
       Lock lock(m_mutex);
@@ -189,9 +189,7 @@ void StatelessWriterT<NetworkDriver>::progress() {
       char hoge[2];
       pbuf_copy_partial(next->data.firstElement, &hoge, 2,0);
       if(hoge[0] != 0 || hoge[1] != 3) {
-        info.buffer.reserve(16);//TODO: clean this
-        uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x01, 0x0f, 0xf2, 0x05, 0x7a, 0x75, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
-        info.buffer.append(info_dst, 16);
+        MessageFactory::addSubMessageDestination(info.buffer);
         //next->data = next->data[1];
         //next->size - next->size - 1;
       }

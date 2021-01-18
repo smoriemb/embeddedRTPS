@@ -84,6 +84,21 @@ void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false) {
 }
 
 template <class Buffer>
+void addSubMessageDestination(Buffer &buffer, std::array<unsigned char, 12>::pointer id_ptr) {
+  buffer.reserve(16);
+  uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x01, 0x0f, 0xf2, 0x05, 0xa8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
+  memcpy(&info_dst[4], id_ptr, 12);
+  buffer.append(info_dst, 16);
+}
+
+template <class Buffer>
+void addSubMessageDestination(Buffer &buffer) {
+  buffer.reserve(16);
+  uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  buffer.append(info_dst, 16);
+}
+
+template <class Buffer>
 void addSubMessageData(Buffer &buffer, const Buffer &filledPayload,
                        bool containsInlineQos, const SequenceNumber_t &SN,
                        const EntityId_t &writerID, const EntityId_t &readerID) {

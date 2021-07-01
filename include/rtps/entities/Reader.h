@@ -38,13 +38,14 @@ struct SubmessageHeartbeat;
 
 class ReaderCacheChange {
 private:
-  const uint8_t *data;
+
 
 public:
   const ChangeKind_t kind;
   const DataSize_t size;
   const Guid writerGuid;
   const SequenceNumber_t sn;
+  const uint8_t *data;
 
   ReaderCacheChange(ChangeKind_t kind, Guid &writerGuid, SequenceNumber_t sn,
                     const uint8_t *data, DataSize_t size)

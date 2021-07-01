@@ -164,7 +164,7 @@ void StatelessWriterT<NetworkDriver>::progress() {
     info.srcPort = m_packetInfo.srcPort;
 
     MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
-    MessageFactory::addSubMessageTimeStamp(info.buffer);
+    //MessageFactory::addSubMessageTimeStamp(info.buffer);
 
     {
       Lock lock(m_mutex);
@@ -185,6 +185,15 @@ void StatelessWriterT<NetworkDriver>::progress() {
                m_nextSequenceNumberToSend.low);
 #endif
       }
+      //TODO: these should be called only when the message data is published.
+      char hoge[2];
+      pbuf_copy_partial(next->data.firstElement, &hoge, 2,0);
+      if(hoge[0] != 0 || hoge[1] != 3) {
+        MessageFactory::addSubMessageDestination(info.buffer);
+        //next->data = next->data[1];
+        //next->size - next->size - 1;
+      }
+      MessageFactory::addSubMessageTimeStamp(info.buffer);
       MessageFactory::addSubMessageData(
           info.buffer, next->data, false, next->sequenceNumber,
           m_attributes.endpointGuid.entityId,

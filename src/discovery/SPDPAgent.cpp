@@ -248,6 +248,45 @@ void SPDPAgent::addInlineQos() {
 }
 
 void SPDPAgent::endCurrentList() {
+  //adding node name and node namespace
+/*
+  ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_ENTITY_NAME); //TODO: clean this
+  ucdr_serialize_uint16_t(&m_microbuffer, 8);
+  ucdr_serialize_uint16_t(&m_microbuffer, 4);
+  ucdr_serialize_uint16_t(&m_microbuffer, 0);
+  ucdr_serialize_uint8_t(&m_microbuffer, 's');
+  ucdr_serialize_uint8_t(&m_microbuffer, 't');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'm');
+  ucdr_serialize_uint8_t(&m_microbuffer, 0);
+
+  ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_USER_DATA); //TODO: clean this
+    ucdr_serialize_uint16_t(&m_microbuffer, 28);
+  ucdr_serialize_uint16_t(&m_microbuffer, 22);
+  ucdr_serialize_uint16_t(&m_microbuffer, 0);
+  ucdr_serialize_uint8_t(&m_microbuffer, 'n');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'a');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'm');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'e');
+  ucdr_serialize_uint8_t(&m_microbuffer, '=');
+  ucdr_serialize_uint8_t(&m_microbuffer, 's');
+  ucdr_serialize_uint8_t(&m_microbuffer, 't');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'm');
+  ucdr_serialize_uint8_t(&m_microbuffer, ';');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'n');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'a');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'm');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'e');
+  ucdr_serialize_uint8_t(&m_microbuffer, 's');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'p');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'a');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'c');
+  ucdr_serialize_uint8_t(&m_microbuffer, 'e');
+  ucdr_serialize_uint8_t(&m_microbuffer, '=');
+  ucdr_serialize_uint8_t(&m_microbuffer, '/');
+  ucdr_serialize_uint8_t(&m_microbuffer, ';');
+  ucdr_serialize_uint8_t(&m_microbuffer, 0);
+  ucdr_serialize_uint16_t(&m_microbuffer, 0);
+*/
   ucdr_serialize_uint16_t(&m_microbuffer, ParameterId::PID_SENTINEL);
   ucdr_serialize_uint16_t(&m_microbuffer, 0);
 }

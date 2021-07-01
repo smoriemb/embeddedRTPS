@@ -146,9 +146,9 @@ rtps::Reader *
 Participant::getMatchingReader(const TopicData &writerTopicData) const {
   for (uint8_t i = 0; i < m_numReaders; ++i) {
     if (m_readers[i]->m_attributes.matchesTopicOf(writerTopicData) &&
-        (writerTopicData.reliabilityKind == ReliabilityKind_t::RELIABLE ||
-         m_readers[i]->m_attributes.reliabilityKind ==
-             ReliabilityKind_t::BEST_EFFORT)) {
+            (writerTopicData.reliabilityKind == ReliabilityKind_t::RELIABLE ||
+              m_readers[i]->m_attributes.reliabilityKind ==
+                  ReliabilityKind_t::BEST_EFFORT)) {
       return m_readers[i];
     }
   }

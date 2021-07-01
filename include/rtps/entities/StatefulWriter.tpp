@@ -283,6 +283,7 @@ bool StatefulWriterT<NetworkDriver>::sendData(
   info.srcPort = m_packetInfo.srcPort;
 
   MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
+  MessageFactory::addSubMessageDestination(info.buffer);
   MessageFactory::addSubMessageTimeStamp(info.buffer);
 
   // Just usable for IPv4
@@ -356,7 +357,7 @@ void StatefulWriterT<NetworkDriver>::sendHeartBeat() {
 #endif
       return;
     }
-
+    MessageFactory::addSubMessageDestination(info.buffer, proxy.remoteReaderGuid.prefix.id.data());
     MessageFactory::addHeartbeat(
         info.buffer, m_attributes.endpointGuid.entityId,
         proxy.remoteReaderGuid.entityId, firstSN, lastSN, m_hbCount);

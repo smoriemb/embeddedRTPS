@@ -74,11 +74,28 @@ void addSubMessageTimeStamp(Buffer &buffer, bool setInvalid = false) {
   if (!setInvalid) {
     buffer.reserve(header.submessageLength);
     Time_t now = getCurrentTimeStamp();
-    buffer.append(reinterpret_cast<uint8_t *>(&now.seconds),
-                  sizeof(Time_t::seconds));
-    buffer.append(reinterpret_cast<uint8_t *>(&now.fraction),
-                  sizeof(Time_t::fraction));
+    // buffer.append(reinterpret_cast<uint8_t *>(&now.seconds),
+    //               sizeof(Time_t::seconds));
+    // buffer.append(reinterpret_cast<uint8_t *>(&now.fraction),
+    //               sizeof(Time_t::fraction));
+     uint8_t time_arr[8] = {0xff, 0x3f, 0x04, 0x60, 0x00, 0xd4, 0x92, 0xa6};
+    buffer.append(time_arr, 8);
   }
+}
+
+template <class Buffer>
+void addSubMessageDestination(Buffer &buffer, std::array<unsigned char, 12>::pointer id_ptr) {
+  buffer.reserve(16);
+  uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x01, 0x0f, 0xf2, 0x05, 0xa8, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00};
+  memcpy(&info_dst[4], id_ptr, 12);
+  buffer.append(info_dst, 16);
+}
+
+template <class Buffer>
+void addSubMessageDestination(Buffer &buffer) {
+  buffer.reserve(16);
+  uint8_t info_dst[16] = {0x0e, 0x01, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  buffer.append(info_dst, 16);
 }
 
 template <class Buffer>

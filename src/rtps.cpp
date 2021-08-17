@@ -44,7 +44,7 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "default_netif.h"
 #include "lwipcfg.h"
 #else
-#include "ethernetif.h"
+#include "ethernetif_init.h"
 #endif
 
 #define INIT_VERBOSE 0
@@ -78,8 +78,7 @@ static void init(void *arg) {
     defined(__WIN32) && !defined(__CYGWIN__)
   netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, pcapif_init, tcpip_input);
 #else
-  netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, ethernetif_init,
-            tcpip_input);
+  netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, rtps_ethernetif_init, tcpip_input);
 #endif
 
   netif_set_default(&netif);

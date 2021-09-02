@@ -26,11 +26,22 @@ Author: i11 - Embedded Software, RWTH Aachen University
 
 #include "lwip/tcpip.h"
 #include "rtps/entities/Writer.h"
+#include "rtps/utils/Log.h"
 #include "rtps/utils/udpUtils.h"
 
 using rtps::ThreadPool;
 
 #define THREAD_POOL_VERBOSE 0
+#if THREAD_POOL_VERBOSE && RTPS_GLOBAL_VERBOSE
+#define THREAD_POOL_LOG(...)
+if (true) {
+  printf("[ThreadPool] ");
+  printf(__VA_ARGS__);
+  printf("\n");
+}
+#else
+#define THREAD_POOL_LOG(...) //
+#endif
 
 ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
     : m_receiveJumppad(receiveCallback), m_callee(callee) {
@@ -40,11 +51,10 @@ ThreadPool::ThreadPool(receiveJumppad_fp receiveCallback, void *callee)
   }
   err_t inputErr = sys_sem_new(&m_readerNotificationSem, 0);
   err_t outputErr = sys_sem_new(&m_writerNotificationSem, 0);
-#if THREAD_POOL_VERBOSE
+
   if (inputErr != ERR_OK || outputErr != ERR_OK) {
-    printf("ThreadPool: Failed to create Semaphores.\n");
+    THREAD_POOL_LOG("ThreadPool: Failed to create Semaphores.\n");
   }
-#endif
 }
 
 ThreadPool::~ThreadPool() {
@@ -101,6 +111,16 @@ bool ThreadPool::startThreads() {
 
 void ThreadPool::stopThreads() {
   m_running = false;
+  // This should call all the semaphores for each thread once, so they don't
+  // stuck before ended.
+  for (auto &thread : m_writers) {
+    sys_sem_signal(&m_writerNotificationSem);
+    sys_msleep(10);
+  }
+  for (auto &thread : m_readers) {
+    sys_sem_signal(&m_readerNotificationSem);
+    sys_msleep(10);
+  }
   // TODO make sure they have finished. Seems to be sufficient for tests.
   // Not sufficient if threads shall actually be stopped during runtime.
   sys_msleep(10);
@@ -131,9 +151,9 @@ bool ThreadPool::addNewPacket(PacketInfo &&packet) {
 void ThreadPool::writerThreadFunction(void *arg) {
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
-#if THREAD_POOL_VERBOSE
-    printf("nullptr passed to writer function\n");
-#endif
+
+    THREAD_POOL_LOG("nullptr passed to writer function\n");
+
     return;
   }
 
@@ -153,28 +173,37 @@ void ThreadPool::doWriterWork() {
   }
 }
 
+
 void ThreadPool::readCallback(void *args, udp_pcb *target, pbuf *pbuf,
                               const ip_addr_t * /*addr*/, Ip4Port_t port) {
   auto &pool = *static_cast<ThreadPool *>(args);
 
   PacketInfo packet;
+
+  // TODO This is a workaround for chained pbufs caused by hardware limitations, not a general fix
+  if(pbuf->next != nullptr){
+    struct pbuf* test = pbuf_alloc(PBUF_RAW, pbuf->tot_len, PBUF_POOL);
+    pbuf_copy(test, pbuf);
+    pbuf_free(pbuf);
+    pbuf = test;
+  }
+
   packet.destAddr = {0}; // not relevant
   packet.destPort = target->local_port;
   packet.srcPort = port;
   packet.buffer = PBufWrapper{pbuf};
+
   if (!pool.addNewPacket(std::move(packet))) {
-#if THREAD_POOL_VERBOSE
-    printf("ThreadPool: dropped packet\n");
-#endif
+    THREAD_POOL_LOG("ThreadPool: dropped packet\n");
   }
 }
 
 void ThreadPool::readerThreadFunction(void *arg) {
   auto pool = static_cast<ThreadPool *>(arg);
   if (pool == nullptr) {
-#if THREAD_POOL_VERBOSE
-    printf("nullptr passed to reader function\n");
-#endif
+
+    THREAD_POOL_LOG("nullptr passed to reader function\n");
+
     return;
   }
   pool->doReaderWork();

@@ -54,6 +54,7 @@ private:
   std::array<uint8_t, 400> m_inputBuffer{};
   ParticipantProxyData m_proxyDataBuffer{};
   ucdrBuffer m_microbuffer{};
+  uint8_t m_cycleHB = 0;
 
   sys_mutex_t m_mutex;
   bool initialized = false;

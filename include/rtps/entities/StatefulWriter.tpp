@@ -23,7 +23,9 @@ Author: i11 - Embedded Software, RWTH Aachen University
 */
 
 #include "lwip/sys.h"
+#ifndef MROS2_USE_EMBEDDEDRTPS
 #include "rtps/entities/StatefulWriter.h"
+#endif
 #include "rtps/messages/MessageFactory.h"
 #include "rtps/utils/Log.h"
 #include <cstring>
@@ -75,14 +77,30 @@ bool StatefulWriterT<NetworkDriver>::init(TopicData attributes,
   mp_threadPool = threadPool;
   if (m_attributes.endpointGuid.entityId ==
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+#ifdef MROS2_USE_EMBEDDEDRTPS
+    m_heartbeatThread = sys_thread_new("HBThreadPub", callHbPubFunc, this,
+                                       Config::HEARTBEAT_STACKSIZE,
+                                       Config::THREAD_POOL_WRITER_PRIO);
+    networkPubDriverPtr = this;
+    hbPubFuncPtr = hbFunctionJumppad;
+#else
     m_heartbeatThread = sys_thread_new("HBThreadPub", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
                                        Config::THREAD_POOL_WRITER_PRIO);
+#endif
   } else if (m_attributes.endpointGuid.entityId ==
              ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+#ifdef MROS2_USE_EMBEDDEDRTPS
+    m_heartbeatThread = sys_thread_new("HBThreadSub", callHbSubFunc, this,
+                                       Config::HEARTBEAT_STACKSIZE,
+                                       Config::THREAD_POOL_WRITER_PRIO);
+    networkSubDriverPtr = this;
+    hbSubFuncPtr = hbFunctionJumppad;
+#else
     m_heartbeatThread = sys_thread_new("HBThreadSub", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
                                        Config::THREAD_POOL_WRITER_PRIO);
+#endif
   } else {
     m_heartbeatThread = sys_thread_new("HBThread", hbFunctionJumppad, this,
                                        Config::HEARTBEAT_STACKSIZE,
@@ -339,6 +357,9 @@ bool StatefulWriterT<NetworkDriver>::sendData(
   info.srcPort = m_packetInfo.srcPort;
 
   MessageFactory::addHeader(info.buffer, m_attributes.endpointGuid.prefix);
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  MessageFactory::addSubMessageDestination(info.buffer);
+#endif
   MessageFactory::addSubMessageTimeStamp(info.buffer);
 
   // Just usable for IPv4
@@ -465,6 +486,9 @@ void StatefulWriterT<NetworkDriver>::sendHeartBeat() {
       return;
     }
 
+#ifdef MROS2_USE_EMBEDDEDRTPS
+    MessageFactory::addSubMessageDestination(info.buffer, proxy.remoteReaderGuid.prefix.id.data());
+#endif
     MessageFactory::addHeartbeat(
         info.buffer, m_attributes.endpointGuid.entityId,
         proxy.remoteReaderGuid.entityId, firstSN, lastSN, m_hbCount);

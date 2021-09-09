@@ -39,13 +39,18 @@ struct SubmessageHeartbeat;
 
 class ReaderCacheChange {
 private:
+#ifndef MROS2_USE_EMBEDDEDRTPS
   const uint8_t *data;
+#endif
 
 public:
   const ChangeKind_t kind;
   const DataSize_t size;
   const Guid_t writerGuid;
   const SequenceNumber_t sn;
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  const uint8_t *data;
+#endif
 
   ReaderCacheChange(ChangeKind_t kind, Guid_t &writerGuid, SequenceNumber_t sn,
                     const uint8_t *data, DataSize_t size)

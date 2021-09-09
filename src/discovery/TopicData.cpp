@@ -158,6 +158,13 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
   ucdr_serialize_uint8_t(
       &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
 
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  // //add: qos expects inline qos
+  // ucdr_serialize_uint16_t(&buffer, ParameterId::PID_EXPECTS_INLINE_QOS);
+  // ucdr_serialize_uint16_t(&buffer, 4);
+  // ucdr_serialize_uint32_t(&buffer, 0);
+#endif
+
   ucdr_serialize_uint16_t(&buffer, ParameterId::PID_ENDPOINT_GUID);
   ucdr_serialize_uint16_t(&buffer, guidSize);
   ucdr_serialize_array_uint8_t(&buffer, endpointGuid.prefix.id.data(),
@@ -166,6 +173,56 @@ bool TopicData::serializeIntoUcdrBuffer(ucdrBuffer &buffer) const {
                                endpointGuid.entityId.entityKey.size());
   ucdr_serialize_uint8_t(
       &buffer, static_cast<uint8_t>(endpointGuid.entityId.entityKind));
+
+#ifdef MROS2_USE_EMBEDDEDRTPS
+/*
+  //TODO: check the max length
+  //added: qos maxlength param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_TYPE_MAX_SIZE_SERIALIZED);
+  ucdr_serialize_uint16_t(&buffer, 4);
+  ucdr_serialize_uint32_t(&buffer, 84);
+
+  //added: qos durability param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_DURABILITY);
+  ucdr_serialize_uint16_t(&buffer, 4);
+  ucdr_serialize_uint32_t(&buffer, 0);
+
+  //added: qos deadline param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_DEADLINE);
+  ucdr_serialize_uint16_t(&buffer, 8);
+  ucdr_serialize_uint32_t(&buffer, 0x7fffffff);
+  ucdr_serialize_uint32_t(&buffer, 0xffffffff);
+
+  //added: qos latency_budget
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_LATENCY_BUDGET);
+  ucdr_serialize_uint16_t(&buffer, 8);
+  ucdr_serialize_uint32_t(&buffer, 0);
+  ucdr_serialize_uint32_t(&buffer, 0);
+
+  //added: qos liveliness param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_LIVELINESS);
+  ucdr_serialize_uint16_t(&buffer, 12);
+  ucdr_serialize_uint32_t(&buffer, 0);
+  ucdr_serialize_uint32_t(&buffer, 0x7fffffff);
+  ucdr_serialize_uint32_t(&buffer, 0xffffffff);
+
+  //added: qos lifespan param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_LIFESPAN);
+  ucdr_serialize_uint16_t(&buffer, 8);
+  ucdr_serialize_uint32_t(&buffer, 0x7fffffff);
+  ucdr_serialize_uint32_t(&buffer, 0xffffffff);
+
+  //added: qos ownership param
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_OWNERSHIP);
+  ucdr_serialize_uint16_t(&buffer, 4);
+  ucdr_serialize_uint32_t(&buffer, 0);
+
+  //added: qos destination order
+  ucdr_serialize_uint16_t(&buffer, ParameterId::PID_DESTINATION_ORDER);
+  ucdr_serialize_uint16_t(&buffer, 4);
+  ucdr_serialize_uint32_t(&buffer, 0);
+*/
+#endif
 
   const uint8_t unidentifiedOffset = 8;
   ucdr_serialize_uint16_t(&buffer, ParameterId::PID_RELIABILITY);

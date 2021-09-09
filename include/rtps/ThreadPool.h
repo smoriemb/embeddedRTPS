@@ -56,6 +56,11 @@ public:
   static void readCallback(void *arg, udp_pcb *pcb, pbuf *p,
                            const ip_addr_t *addr, Ip4Port_t port);
 
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  static void writerThreadFunction(void *arg);
+  static void readerThreadFunction(void *arg);
+#endif
+
 private:
   receiveJumppad_fp m_receiveJumppad;
   void *m_callee;
@@ -72,11 +77,24 @@ private:
                            Config::THREAD_POOL_WORKLOAD_QUEUE_LENGTH>
       m_queueIncoming;
 
+#ifndef MROS2_USE_EMBEDDEDRTPS
   static void writerThreadFunction(void *arg);
   static void readerThreadFunction(void *arg);
+#endif
   void doWriterWork();
   void doReaderWork();
 };
 } // namespace rtps
+
+#ifdef MROS2_USE_EMBEDDEDRTPS
+#ifdef __cplusplus
+extern "C" {
+#endif
+void callWriterThreadFunction(void *arg);
+void callReaderThreadFunction(void *arg);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #endif // RTPS_THREADPOOL_H

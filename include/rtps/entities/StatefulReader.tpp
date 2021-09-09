@@ -74,11 +74,15 @@ void StatefulReaderT<NetworkDriver>::newChange(
   Lock lock{m_mutex};
   for (auto &proxy : m_proxies) {
     if (proxy.remoteWriterGuid == cacheChange.writerGuid) {
+#ifndef MROS2_USE_EMBEDDEDRTPS
       if (proxy.expectedSN == cacheChange.sn) {
+#endif
         m_callback(m_callee, cacheChange);
         ++proxy.expectedSN;
         return;
+#ifndef MROS2_USE_EMBEDDEDRTPS
       }
+#endif
     }
   }
 }
@@ -169,6 +173,9 @@ bool StatefulReaderT<NetworkDriver>::onNewHeartbeat(
   info.destPort = writer->remoteLocator.port;
   rtps::MessageFactory::addHeader(info.buffer,
                                   m_attributes.endpointGuid.prefix);
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  rtps::MessageFactory::addSubMessageDestination(info.buffer);
+#endif
   rtps::MessageFactory::addAckNack(info.buffer, msg.writerId, msg.readerId,
                                    writer->getMissing(msg.firstSN, msg.lastSN),
                                    writer->getNextAckNackCount());

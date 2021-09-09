@@ -44,6 +44,9 @@ public:
   void init(Participant &participant, BuiltInEndpoints &endpoints);
   void start();
   void stop();
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  static void runBroadcast(void *args);
+#endif
 
 private:
   Participant *mp_participant = nullptr;
@@ -67,9 +70,20 @@ private:
   void addInlineQos();
   void addParticipantParameters();
   void endCurrentList();
-
+#ifndef MROS2_USE_EMBEDDEDRTPS
   static void runBroadcast(void *args);
+#endif
 };
 } // namespace rtps
+
+#ifdef MROS2_USE_EMBEDDEDRTPS
+#ifdef __cplusplus
+extern "C" {
+#endif
+void callRunBroadcast(void *args);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 #endif // RTPS_SPDP_H

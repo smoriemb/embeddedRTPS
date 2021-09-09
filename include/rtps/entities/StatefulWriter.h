@@ -81,6 +81,15 @@ private:
 using StatefulWriter = StatefulWriterT<UdpDriver>;
 } // namespace rtps
 
+#ifdef MROS2_USE_EMBEDDEDRTPS
+extern void *networkSubDriverPtr;
+extern void *networkPubDriverPtr;
+extern void (*hbPubFuncPtr)(void *);
+extern void (*hbSubFuncPtr)(void *);
+extern "C" void callHbPubFunc(void *arg);
+extern "C" void callHbSubFunc(void *arg);
+#endif
+
 #include "StatefulWriter.tpp"
 
 #endif // RTPS_STATEFULWRITER_H

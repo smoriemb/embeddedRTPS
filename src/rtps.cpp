@@ -44,7 +44,11 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #include "../pcapif.h"
 #include "default_netif.h"
 #else
+#ifdef MROS2_USE_EMBEDDEDRTPS
+#include "ethernetif_init.h"
+#else
 #include "ethernetif.h"
+#endif
 #endif
 
 #define INIT_VERBOSE 0
@@ -73,7 +77,11 @@ static void init(void *arg) {
 #endif
 
 #if defined(unix) || defined(__unix__)
+#ifdef MROS2_USE_EMBEDDEDRTPS
+  netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, rtps_tapif_init, tcpip_input);
+#else
   netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, tapif_init, tcpip_input);
+#endif
 #elif defined(WIN32) || defined(_WIN32) ||                                     \
     defined(__WIN32) && !defined(__CYGWIN__)
   netif_add(&netif, &ipaddr, &netmask, &gw, nullptr, pcapif_init, tcpip_input);

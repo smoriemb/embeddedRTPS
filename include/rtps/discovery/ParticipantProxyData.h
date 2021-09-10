@@ -64,11 +64,7 @@ public:
   std::chrono::time_point<std::chrono::high_resolution_clock>
       m_lastLivelinessReceivedTimestamp;
 #else
-#ifndef MROS2_USE_EMBEDDEDRTPS
   TickType_t m_lastLivelinessReceivedTickCount = 0;
-#else
-  uint32_t m_lastLivelinessReceivedTickCount = 0;
-#endif
 #endif
   void reset();
 

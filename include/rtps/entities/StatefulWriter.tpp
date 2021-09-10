@@ -449,7 +449,11 @@ void StatefulWriterT<NetworkDriver>::sendHeartBeatLoop() {
   while (m_running) {
     sendHeartBeat();
 #ifdef OS_IS_FREERTOS
+#ifndef MROS2_USE_EMBEDDEDRTPS
     vTaskDelay(pdMS_TO_TICKS(Config::SF_WRITER_HB_PERIOD_MS));
+#else
+    osDelay(pdMS_TO_TICKS(Config::SF_WRITER_HB_PERIOD_MS));
+#endif
 #else
     sys_msleep(Config::SF_WRITER_HB_PERIOD_MS);
 #endif

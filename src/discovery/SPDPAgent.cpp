@@ -93,7 +93,11 @@ void SPDPAgent::runBroadcast(void *args) {
       ChangeKind_t::ALIVE, agent.m_microbuffer.init, size);
   while (agent.m_running) {
 #ifdef OS_IS_FREERTOS
+#ifndef MROS2_USE_EMBEDDEDRTPS
     vTaskDelay(pdMS_TO_TICKS(Config::SPDP_RESEND_PERIOD_MS));
+#else
+    osDelay(pdMS_TO_TICKS(Config::SPDP_RESEND_PERIOD_MS));
+#endif
 #else
     sys_msleep(Config::SPDP_RESEND_PERIOD_MS);
 #endif

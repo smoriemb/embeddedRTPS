@@ -64,7 +64,11 @@ public:
   std::chrono::time_point<std::chrono::high_resolution_clock>
       m_lastLivelinessReceivedTimestamp;
 #else
+#ifndef MROS2_USE_EMBEDDEDRTPS
   TickType_t m_lastLivelinessReceivedTickCount = 0;
+#else
+  uint32_t m_lastLivelinessReceivedTickCount = 0;
+#endif
 #endif
   void reset();
 
@@ -147,7 +151,11 @@ void ParticipantProxyData::onAliveSignal() {
 #if defined(unix) || defined(__unix__)
   m_lastLivelinessReceivedTimestamp = std::chrono::high_resolution_clock::now();
 #else
+#ifndef MROS2_USE_EMBEDDEDRTPS
   m_lastLivelinessReceivedTickCount = xTaskGetTickCount();
+#else
+  m_lastLivelinessReceivedTickCount = osKernelGetTickCount();
+#endif
 #endif
 }
 
@@ -158,8 +166,13 @@ uint32_t ParticipantProxyData::getAliveSignalAgeInMilliseconds() {
       now - m_lastLivelinessReceivedTimestamp;
   return duration.count();
 #else
+#ifndef MROS2_USE_EMBEDDEDRTPS
   return (xTaskGetTickCount() - m_lastLivelinessReceivedTickCount) *
          (1000 / configTICK_RATE_HZ);
+#else
+  return (osKernelGetTickCount() - m_lastLivelinessReceivedTickCount) *
+         (1000 / configTICK_RATE_HZ);
+#endif
 #endif
 }
 

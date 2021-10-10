@@ -25,6 +25,15 @@ Author: i11 - Embedded Software, RWTH Aachen University
 #ifndef RTPS_THREADPOOL_H
 #define RTPS_THREADPOOL_H
 
+#ifdef __MBED__
+#ifdef __cplusplus
+extern "C" {
+#endif
+void sys_msleep(unsigned int ms);
+#ifdef __cplusplus
+}
+#endif
+#endif /* __MBED__ */
 #include "lwip/sys.h"
 #include "rtps/communication/PacketInfo.h"
 #include "rtps/communication/UdpDriver.h"

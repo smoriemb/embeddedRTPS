@@ -80,6 +80,7 @@ struct Locator {
       ucdr_serialize_array_uint8_t(&buffer, reinterpret_cast<uint8_t *>(this),
                                    sizeof(Locator));
     }
+    return true;
   }
 
   ip4_addr_t getIp4Address() const {
